@@ -89,11 +89,6 @@ func FindIndonesianLocations(db *mongo.Database) []models.Location {
 		}
 	}
 
-	err := db.Client().Disconnect(ctx)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
 	return result
 }
 
@@ -102,11 +97,6 @@ func FindLocationById(db *mongo.Database, loc_id string) models.Location {
 
 	var result models.Location
 	err := db.Collection("location").FindOne(ctx, bson.M{"location_id": loc_id}).Decode(&result)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	err = db.Client().Disconnect(ctx)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

@@ -16,11 +16,7 @@ func main() {
 	locs := services.FindIndonesianLocations(db)
 
 	for _, loc := range locs {
+		log.Println("------------------------", loc.Name)
 		services.InsertSentiments(db, loc)
 	}
-
-	// err = db.Client().Disconnect(database.Ctx)
-	// if err != nil {
-	// 	log.Fatal(err.Error())
-	// }
 }
