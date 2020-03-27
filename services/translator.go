@@ -30,7 +30,7 @@ type TranslateResponse struct {
 	Text []string `json:"text"`
 }
 
-func GetSourceLang(src_lang string) string {
+func GetSourceLang(srcLang string) string {
 	langs := map[string]string{
 		"in":   "id",
 		"zhCN": "zh",
@@ -62,19 +62,19 @@ func GetSourceLang(src_lang string) string {
 		"esCL": "es",
 	}
 
-	return langs[src_lang]
+	return langs[srcLang]
 }
 
-func TranslateReview(text string, src_lang string, api_key string) string {
-	target_lang := "en"
-	lang := target_lang
+func TranslateReview(text string, srcLang string, APIKey string) string {
+	targetLang := "en"
+	lang := targetLang
 
-	if src_lang != "" {
-		tripadvisor_lang := GetSourceLang(src_lang)
-		if tripadvisor_lang != "" {
-			src_lang = tripadvisor_lang
+	if srcLang != "" {
+		tripadvisorLang := GetSourceLang(srcLang)
+		if tripadvisorLang != "" {
+			srcLang = tripadvisorLang
 		}
-		lang = src_lang + "-" + target_lang
+		lang = srcLang + "-" + targetLang
 	}
 
 	client := &http.Client{
@@ -89,7 +89,7 @@ func TranslateReview(text string, src_lang string, api_key string) string {
 		log.Fatal(err.Error())
 	}
 	q := req.URL.Query()
-	q.Add("key", api_key)
+	q.Add("key", APIKey)
 	q.Add("lang", lang)
 	q.Add("text", text)
 	req.URL.RawQuery = q.Encode()

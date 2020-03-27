@@ -33,10 +33,10 @@ func FindAllReviews(db *mongo.Database) []models.Review {
 	return result
 }
 
-func FindReviewByRestaurant(db *mongo.Database, rest_obj_id primitive.ObjectID) []models.Review {
+func FindReviewByRestaurant(db *mongo.Database, restObjId primitive.ObjectID) []models.Review {
 	ctx := database.Ctx
 
-	csr, err := db.Collection("review").Find(ctx, bson.M{"restaurant_ObjectId": rest_obj_id})
+	csr, err := db.Collection("review").Find(ctx, bson.M{"restaurant_ObjectId": restObjId})
 	if err != nil {
 		log.Fatal(err.Error())
 	}
