@@ -45,7 +45,7 @@ func main() {
 				}
 
 				vaderScore := services.VaderAnalyze(translatedText)
-				services.WordnetAnalyze(translatedText)
+				wordnetScore := services.WordnetAnalyze(translatedText)
 
 				service, _ := strconv.ParseFloat(rev.Rating, 64)
 				value, _ := strconv.ParseFloat(rev.Rating, 64)
@@ -56,27 +56,27 @@ func main() {
 					log.Fatal(err.Error())
 				}
 
-				var result models.Sentiment
+				result := models.Sentiment{
+					ID:             primitive.NewObjectID(),
+					PublishedDate:  rev.PublishedDate,
+					LocationId:     rest.LocationID,
+					Location:       loc,
+					RestaurantId:   rest.LocationId,
+					Restaurant:     rest,
+					ReviewId:       rev.Id,
+					Review:         rev,
+					Month:          int32(publishedDate.Month()),
+					Year:           int32(publishedDate.Year()),
+					TranslatedText: translatedText,
+					Service:        service,
+					Value:          value,
+					Food:           food,
+					Vader:          vaderScore,
+					Wordnet:        wordnetScore,
+					CreatedAt:      time.Now(),
+				}
 
-				result.ID = primitive.NewObjectID()
-				result.PublishedDate = rev.PublishedDate
-				result.LocationId = rest.LocationID
-				result.Location = loc
-				result.RestaurantId = rest.LocationId
-				result.Restaurant = rest
-				result.ReviewId = rev.Id
-				result.Review = rev
-				result.Month = int32(publishedDate.Month())
-				result.Year = int32(publishedDate.Year())
-				result.TranslatedText = translatedText
-				result.Service = service
-				result.Value = value
-				result.Food = food
-				result.Vader = vaderScore
-				result.Wordnet = 0
-				result.CreatedAt = time.Now()
-
-				log.Println(result)
+				services.InsertSentiment(db, result)
 			}
 		}
 	}

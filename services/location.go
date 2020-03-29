@@ -37,6 +37,12 @@ func FindIndonesianLocations(db *mongo.Database) []models.Location {
 	ctx := database.Ctx
 
 	cities := []string{
+		"Surabaya",
+		"Jakarta",
+		"Bandung",
+		"Semarang",
+		"Yogyakarta Region",
+		"Denpasar",
 		"Banda Aceh",
 		"Medan",
 		"Padang",
@@ -46,13 +52,7 @@ func FindIndonesianLocations(db *mongo.Database) []models.Location {
 		"Bandar Lampung",
 		"Pangkal Pinang",
 		"Tanjung Pinang",
-		"Jakarta",
-		"Bandung",
-		"Semarang",
-		"Yogyakarta Region",
-		"Surabaya",
 		"Serang",
-		"Denpasar",
 		"Mataram",
 		"Kupang",
 		"Pontianak",
