@@ -2,16 +2,24 @@ package main
 
 import (
 	"log"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/dinopuguh/kawulo-go-sentiment/database"
 	"github.com/dinopuguh/kawulo-go-sentiment/models"
 	"github.com/dinopuguh/kawulo-go-sentiment/services"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func main() {
+	yandexAPIKeyId := 1
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	db, err := database.Connect()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -41,7 +49,12 @@ func main() {
 
 				translatedText := text
 				if lang != "en" {
-					translatedText = services.TranslateReview(text, lang, "trnsl.1.1.20191231T003150Z.5e39cb9fd8acfcf0.319e28c6c047015447eaa9f45951fd16a87f9a8c")
+					translatedText, err = services.TranslateReview(text, lang, os.Getenv("YANDEX_API_KEY"+strconv.Itoa(yandexAPIKeyId)))
+					if err != nil && yandexAPIKeyId < 4 {
+						yandexAPIKeyId++
+						log.Println("Change Yandex API Key", yandexAPIKeyId)
+						translatedText, _ = services.TranslateReview(text, lang, os.Getenv("YANDEX_API_KEY"+strconv.Itoa(yandexAPIKeyId)))
+					}
 				}
 
 				vaderScore := services.VaderAnalyze(translatedText)

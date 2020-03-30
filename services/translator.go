@@ -65,7 +65,7 @@ func GetSourceLang(srcLang string) string {
 	return langs[srcLang]
 }
 
-func TranslateReview(text string, srcLang string, APIKey string) string {
+func TranslateReview(text string, srcLang string, APIKey string) (string, error) {
 	targetLang := "en"
 	lang := targetLang
 
@@ -86,7 +86,7 @@ func TranslateReview(text string, srcLang string, APIKey string) string {
 
 	req, err := http.NewRequest("POST", BaseUrl, nil)
 	if err != nil {
-		log.Fatal(err.Error())
+		return "", err
 	}
 	q := req.URL.Query()
 	q.Add("key", APIKey)
@@ -109,13 +109,13 @@ func TranslateReview(text string, srcLang string, APIKey string) string {
 	}
 
 	if err != nil {
-		log.Fatal(err.Error())
+		return "", err
 	}
 
 	err = json.NewDecoder(res.Body).Decode(&data)
-	if err != nil {
-		log.Fatal(err.Error())
+	if err != nil || len(data.Text) == 0 {
+		return "", err
 	}
 
-	return data.Text[0]
+	return data.Text[0], nil
 }

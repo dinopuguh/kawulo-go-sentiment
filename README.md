@@ -1,1 +1,1 @@
-kawulo-go-sentiment
+kawulo-temporal
