@@ -9,16 +9,11 @@ import (
 	"github.com/dinopuguh/kawulo-go-sentiment/database"
 	"github.com/dinopuguh/kawulo-go-sentiment/models"
 	"github.com/dinopuguh/kawulo-go-sentiment/services"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func main() {
 	yandexAPIKeyId := 1
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	db, err := database.Connect()
 	if err != nil {

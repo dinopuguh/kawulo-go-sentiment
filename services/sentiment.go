@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/aaaton/golem"
-	"github.com/aaaton/golem/dicts/en"
+	"github.com/aaaton/golem/v4"
+	"github.com/aaaton/golem/v4/dicts/en"
 	"github.com/bbalet/stopwords"
 	"github.com/dinopuguh/gosentiwordnet"
 	"github.com/dinopuguh/kawulo-go-sentiment/database"
