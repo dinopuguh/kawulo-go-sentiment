@@ -1,7 +1,6 @@
 package services
 
 import (
-	"log"
 	"regexp"
 	"strings"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/dinopuguh/kawulo-go-sentiment/database"
 	"github.com/dinopuguh/kawulo-go-sentiment/models"
 	"github.com/jonreiter/govader"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/jdkato/prose.v2"
@@ -29,15 +29,17 @@ func CheckSentimentExist(db *mongo.Database, revId string) bool {
 	return true
 }
 
-func InsertSentiment(db *mongo.Database, sentiment models.Sentiment) {
+func InsertSentiment(db *mongo.Database, sentiment models.Sentiment) error {
 	ctx := database.Ctx
 
 	crs, err := db.Collection("sentiment").InsertOne(ctx, sentiment)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
-	log.Println("Insert sentiment success -", crs.InsertedID)
+	logrus.Infoln("Insert sentiment success -", crs.InsertedID)
+
+	return nil
 }
 
 func VaderAnalyze(text string) float64 {
@@ -68,7 +70,7 @@ func WordnetAnalyze(text string) float64 {
 
 	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
 	if err != nil {
-		log.Fatal(err.Error())
+		logrus.Fatal(err.Error())
 	}
 
 	newText := reg.ReplaceAllString(text, " ")
@@ -77,7 +79,7 @@ func WordnetAnalyze(text string) float64 {
 
 	doc, err := prose.NewDocument(cleanText)
 	if err != nil {
-		log.Fatal(err.Error())
+		logrus.Fatal(err.Error())
 	}
 
 	var degree float64
@@ -86,7 +88,7 @@ func WordnetAnalyze(text string) float64 {
 	for _, tok := range doc.Tokens() {
 		lemmatizer, err := golem.New(en.New())
 		if err != nil {
-			log.Fatal(err.Error())
+			logrus.Fatal(err.Error())
 		}
 
 		lemmatized := lemmatizer.Lemma(tok.Text)

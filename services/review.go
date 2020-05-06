@@ -1,10 +1,9 @@
 package services
 
 import (
-	"log"
-
 	"github.com/dinopuguh/kawulo-go-sentiment/database"
 	"github.com/dinopuguh/kawulo-go-sentiment/models"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,7 +14,7 @@ func FindAllReviews(db *mongo.Database) []models.Review {
 
 	crs, err := db.Collection("review").Find(ctx, bson.M{})
 	if err != nil {
-		log.Fatal(err.Error())
+		logrus.Fatal(err.Error())
 	}
 	defer crs.Close(ctx)
 
@@ -24,7 +23,7 @@ func FindAllReviews(db *mongo.Database) []models.Review {
 		var row models.Review
 		err := crs.Decode(&row)
 		if err != nil {
-			log.Fatal(err.Error())
+			logrus.Fatal(err.Error())
 		}
 
 		result = append(result, row)
@@ -38,7 +37,7 @@ func FindReviewByRestaurant(db *mongo.Database, restObjId primitive.ObjectID) []
 
 	csr, err := db.Collection("review").Find(ctx, bson.M{"restaurant_ObjectId": restObjId})
 	if err != nil {
-		log.Fatal(err.Error())
+		logrus.Fatal(err.Error())
 	}
 	defer csr.Close(ctx)
 
@@ -47,7 +46,7 @@ func FindReviewByRestaurant(db *mongo.Database, restObjId primitive.ObjectID) []
 		var row models.Review
 		err := csr.Decode(&row)
 		if err != nil {
-			log.Fatal(err.Error())
+			logrus.Fatal(err.Error())
 		}
 
 		result = append(result, row)
