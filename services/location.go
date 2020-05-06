@@ -1,10 +1,9 @@
 package services
 
 import (
-	"log"
-
 	"github.com/dinopuguh/kawulo-go-sentiment/database"
 	"github.com/dinopuguh/kawulo-go-sentiment/models"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,7 +14,7 @@ func FindAllLocations(db *mongo.Database) []models.Location {
 
 	csr, err := db.Collection("location").Find(ctx, bson.M{})
 	if err != nil {
-		log.Fatal(err.Error())
+		logrus.Fatal(err.Error())
 	}
 	defer csr.Close(ctx)
 
@@ -24,7 +23,7 @@ func FindAllLocations(db *mongo.Database) []models.Location {
 		var row models.Location
 		err := csr.Decode(&row)
 		if err != nil {
-			log.Fatal(err.Error())
+			logrus.Fatal(err.Error())
 		}
 
 		result = append(result, row)
@@ -74,7 +73,7 @@ func FindIndonesianLocations(db *mongo.Database) []models.Location {
 	for _, city := range cities {
 		csr, err := db.Collection("location").Find(ctx, bson.M{"name": city})
 		if err != nil {
-			log.Fatal(err.Error())
+			logrus.Fatal(err.Error())
 		}
 		defer csr.Close(ctx)
 
@@ -82,7 +81,7 @@ func FindIndonesianLocations(db *mongo.Database) []models.Location {
 			var row models.Location
 			err := csr.Decode(&row)
 			if err != nil {
-				log.Fatal(err.Error())
+				logrus.Fatal(err.Error())
 			}
 
 			result = append(result, row)
@@ -98,7 +97,7 @@ func FindLocationById(db *mongo.Database, locId string) models.Location {
 	var result models.Location
 	err := db.Collection("location").FindOne(ctx, bson.M{"location_id": locId}).Decode(&result)
 	if err != nil {
-		log.Fatal(err.Error())
+		logrus.Fatal(err.Error())
 	}
 
 	return result
@@ -110,7 +109,7 @@ func FindLocationByQuery(db *mongo.Database, query string) []models.Location {
 	filter := bson.M{"name": primitive.Regex{Pattern: "^" + query + ".*", Options: "i"}}
 	csr, err := db.Collection("location").Find(ctx, filter)
 	if err != nil {
-		log.Fatal(err.Error())
+		logrus.Fatal(err.Error())
 	}
 	defer csr.Close(ctx)
 
@@ -119,7 +118,7 @@ func FindLocationByQuery(db *mongo.Database, query string) []models.Location {
 		var row models.Location
 		err := csr.Decode(&row)
 		if err != nil {
-			log.Fatal(err.Error())
+			logrus.Fatal(err.Error())
 		}
 
 		result = append(result, row)

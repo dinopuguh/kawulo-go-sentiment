@@ -2,10 +2,11 @@ package services
 
 import (
 	"encoding/json"
-	"log"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -101,7 +102,7 @@ func TranslateReview(text string, srcLang string, APIKey string) (string, error)
 
 		if err != nil {
 			retries -= 1
-			log.Println("Retrying...")
+			logrus.Infoln("Retrying...")
 		} else {
 			defer res.Body.Close()
 			break

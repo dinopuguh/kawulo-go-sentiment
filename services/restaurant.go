@@ -1,10 +1,9 @@
 package services
 
 import (
-	"log"
-
 	"github.com/dinopuguh/kawulo-go-sentiment/database"
 	"github.com/dinopuguh/kawulo-go-sentiment/models"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -14,7 +13,7 @@ func FindAllRestaurants(db *mongo.Database) []models.Restaurant {
 
 	csr, err := db.Collection("restaurant").Find(ctx, bson.M{})
 	if err != nil {
-		log.Fatal(err.Error())
+		logrus.Fatal(err.Error())
 	}
 	defer csr.Close(ctx)
 
@@ -23,7 +22,7 @@ func FindAllRestaurants(db *mongo.Database) []models.Restaurant {
 		var row models.Restaurant
 		err := csr.Decode(&row)
 		if err != nil {
-			log.Fatal(err.Error())
+			logrus.Fatal(err.Error())
 		}
 
 		result = append(result, row)
@@ -37,7 +36,7 @@ func FindRestaurantByLocation(db *mongo.Database, locId string) []models.Restaur
 
 	csr, err := db.Collection("restaurant").Find(ctx, bson.M{"locationID": locId})
 	if err != nil {
-		log.Fatal(err.Error())
+		logrus.Fatal(err.Error())
 	}
 	defer csr.Close(ctx)
 
@@ -46,7 +45,7 @@ func FindRestaurantByLocation(db *mongo.Database, locId string) []models.Restaur
 		var row models.Restaurant
 		err := csr.Decode(&row)
 		if err != nil {
-			log.Fatal(err.Error())
+			logrus.Fatal(err.Error())
 		}
 
 		result = append(result, row)
