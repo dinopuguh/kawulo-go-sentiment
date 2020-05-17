@@ -60,7 +60,7 @@ func main() {
 	}
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(5)
 	go func() {
 		defer wg.Done()
 		for {
@@ -145,6 +145,8 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 				} else {
 					saveSentiment(db, session, message, reviewMsg, translatedText)
 				}
+			} else {
+				saveSentiment(db, session, message, reviewMsg, translatedText)
 			}
 		} else {
 			saveSentiment(db, session, message, reviewMsg, translatedText)
