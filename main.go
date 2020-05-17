@@ -136,14 +136,18 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 		translatedText := text
 		if lang != "en" {
 			translatedText, err = services.TranslateReview(text, lang, os.Getenv("YANDEX_API_KEY"+strconv.Itoa(yandexAPIKeyId)))
-			if err != nil && yandexAPIKeyId < 4 {
-				yandexAPIKeyId++
-				logrus.Println("Change Yandex API Key", yandexAPIKeyId)
-				translatedText, err = services.TranslateReview(text, lang, os.Getenv("YANDEX_API_KEY"+strconv.Itoa(yandexAPIKeyId)))
-				if err != nil {
-					logrus.Errorf("Unable to translate review: %v", err)
+			if err != nil {
+				if yandexAPIKeyId < 4 {
+					yandexAPIKeyId++
+					logrus.Println("Change Yandex API Key", yandexAPIKeyId)
+					translatedText, err = services.TranslateReview(text, lang, os.Getenv("YANDEX_API_KEY"+strconv.Itoa(yandexAPIKeyId)))
+					if err != nil {
+						logrus.Errorf("Unable to translate review: %v", err)
+					} else {
+						saveSentiment(db, session, message, reviewMsg, translatedText)
+					}
 				} else {
-					saveSentiment(db, session, message, reviewMsg, translatedText)
+					logrus.Panicln("Yandex Translate API limit already reached.")
 				}
 			} else {
 				saveSentiment(db, session, message, reviewMsg, translatedText)
