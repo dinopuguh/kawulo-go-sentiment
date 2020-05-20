@@ -23,8 +23,8 @@ import (
 
 var (
 	brokers        = fmt.Sprintf("%v:%v", os.Getenv("KAFKA_SERVER"), os.Getenv("KAFKA_PORT"))
-	group          = os.Getenv("KAWULO_CONSUMER_GROUP")
-	topics         = os.Getenv("KAWULO_SENTIMENT_TOPICS")
+	group          = os.Getenv("KAWULO_SENTIMENT_CONSUMER")
+	topics         = os.Getenv("KAWULO_TRANSLATE_TOPICS")
 	version        = os.Getenv("KAFKA_VERSION")
 	yandexAPIKeyId = 1
 )
@@ -60,7 +60,7 @@ func main() {
 	}
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(5)
 	go func() {
 		defer wg.Done()
 		for {
@@ -122,60 +122,42 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 	}
 
 	for message := range claim.Messages() {
-		reviewMsg := &models.ReviewMessage{}
+		translatedMsg := &models.TranslatedMessage{}
 
-		err := json.Unmarshal([]byte(message.Value), reviewMsg)
+		err := json.Unmarshal([]byte(message.Value), translatedMsg)
 		if err != nil {
 			logrus.Errorf("Unable to unmarshal kafka message: %v", err)
 			return err
 		}
 
-		text := reviewMsg.Review.Text
-		lang := reviewMsg.Review.Lang
-
-		translatedText := text
-		if lang != "en" {
-			translatedText, err = services.TranslateReview(text, lang, os.Getenv("YANDEX_API_KEY"+strconv.Itoa(yandexAPIKeyId)))
-			if err != nil && yandexAPIKeyId < 4 {
-				yandexAPIKeyId++
-				logrus.Println("Change Yandex API Key", yandexAPIKeyId)
-				translatedText, err = services.TranslateReview(text, lang, os.Getenv("YANDEX_API_KEY"+strconv.Itoa(yandexAPIKeyId)))
-				if err != nil {
-					logrus.Errorf("Unable to translate review: %v", err)
-				} else {
-					saveSentiment(db, session, message, reviewMsg, translatedText)
-				}
-			}
-		} else {
-			saveSentiment(db, session, message, reviewMsg, translatedText)
-		}
+		saveSentiment(db, session, message, translatedMsg, translatedMsg.Translated)
 	}
 
 	return nil
 }
 
-func saveSentiment(db *mongo.Database, session sarama.ConsumerGroupSession, message *sarama.ConsumerMessage, reviewMsg *models.ReviewMessage, translatedText string) {
+func saveSentiment(db *mongo.Database, session sarama.ConsumerGroupSession, message *sarama.ConsumerMessage, translatedMsg *models.TranslatedMessage, translatedText string) {
 	vaderScore := services.VaderAnalyze(translatedText)
 	wordnetScore := services.WordnetAnalyze(translatedText)
 
-	service, _ := strconv.ParseFloat(reviewMsg.Review.Rating, 64)
-	value, _ := strconv.ParseFloat(reviewMsg.Review.Rating, 64)
-	food, _ := strconv.ParseFloat(reviewMsg.Review.Rating, 64)
+	service, _ := strconv.ParseFloat(translatedMsg.Review.Rating, 64)
+	value, _ := strconv.ParseFloat(translatedMsg.Review.Rating, 64)
+	food, _ := strconv.ParseFloat(translatedMsg.Review.Rating, 64)
 
-	publishedDate, err := time.Parse("2006-01-02T15:04:05-04:00", reviewMsg.Review.PublishedDate)
+	publishedDate, err := time.Parse("2006-01-02T15:04:05-04:00", translatedMsg.Review.PublishedDate)
 	if err != nil {
 		logrus.Fatal(err.Error())
 	}
 
 	result := models.Sentiment{
 		ID:             primitive.NewObjectID(),
-		PublishedDate:  reviewMsg.Review.PublishedDate,
-		LocationId:     reviewMsg.Restaurant.LocationID,
-		Location:       reviewMsg.Location,
-		RestaurantId:   reviewMsg.Restaurant.LocationId,
-		Restaurant:     reviewMsg.Restaurant,
-		ReviewId:       reviewMsg.Review.Id,
-		Review:         reviewMsg.Review,
+		PublishedDate:  translatedMsg.Review.PublishedDate,
+		LocationId:     translatedMsg.Restaurant.LocationID,
+		Location:       translatedMsg.Location,
+		RestaurantId:   translatedMsg.Restaurant.LocationId,
+		Restaurant:     translatedMsg.Restaurant,
+		ReviewId:       translatedMsg.Review.Id,
+		Review:         translatedMsg.Review,
 		Month:          int32(publishedDate.Month()),
 		Year:           int32(publishedDate.Year()),
 		TranslatedText: translatedText,
